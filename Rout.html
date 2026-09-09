@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>HELION — Registro de Servidor Ejecutivo</title>
+<style>
+  body {
+    background-color: #0b0804;
+    color: #ff9d00; /* Naranja/Ámbar por defecto */
+    font-family: 'Courier New', Courier, monospace;
+    padding: 40px;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    text-shadow: 0 0 5px rgba(255, 157, 0, 0.6);
+    overflow-x: hidden;
+  }
+  /* Efecto de líneas de escaneo CRT */
+  body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+  }
+  #terminal { white-space: pre-wrap; }
+  .cursor {
+    display: inline-block;
+    width: 9px;
+    height: 1.1rem;
+    background-color: #ff9d00;
+    vertical-align: middle;
+    animation: blink 0.8s infinite;
+  }
+  /* Clase específica para el texto del correo en VERDE */
+  .correo-verde {
+    color: #33ff33;
+    text-shadow: 0 0 6px rgba(51, 255, 51, 0.7);
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+<div id="terminal"></div><span class="cursor" id="cursor"></span>
+
+<script>
+const terminal = document.getElementById('terminal');
+
+// Secuencia de texto por fragmentos
+const logs = [
+  { text: "[HELION — RECUPERACIÓN DE DATOS DE ALTA PRIORIDAD]\n", speed: 20, pause: 300 },
+  { text: "[Servidor de origen: Nodo-01 / Presidencia Central]\n", speed: 20, pause: 300 },
+  { text: "[Estado del archivo: Desencriptado exitoso — Registro 0018-H]\n\n", speed: 20, pause: 600 },
+  
+  // CABECERA DEL CORREO (En color Naranja/Ámbar)
+  { text: "--------------------------------------------------\n", speed: 10, pause: 100 },
+  { text: "[FECHA DE EMISIÓN: 28/10/2088 — Cierre Central]\n", speed: 15, pause: 200 },
+  { text: "[DE: Presidente Hayes <v.hayes@gobierno.central.gov>]\n", speed: 15, pause: 200 },
+  { text: "[PARA: Mateo Rinaldi <m.rinaldi@gobierno.central.gov>]\n", speed: 15, pause: 200 },
+  { text: "[ASUNTO: RE: Informes semanales del Observatorio (URGENTE)]\n", speed: 15, pause: 400 },
+  { text: "--------------------------------------------------\n\n", speed: 10, pause: 500 },
+
+  // CUERPO DEL CORREO (Se cambia a VERDE mediante la clase 'correo-verde')
+  { 
+    text: `Mateo,
+
+Por favor, haz algo con el Dr. Vance. Ya es el cuarto informe que envia en mi correo esta semana. 
+
+Sigue obsesionado con la "posible desviación térmica en Alaska" y las lecturas de los satélites. Ya entendí su punto, pero no podemos paralizar el presupuesto de infraestructura del último trimestre solo porque unos astrónomos vean picos de calor en sus gráficas. Estamos en pleno verano, es normal que las temperaturas rompan récords, pasa cada tres o cuatro años.
+
+Para cerrar este tema antes de la rueda de prensa del viernes y que los medios dejen de presionar con las "posibles alertas climáticas", se me ocurrió una idea: vamos a lanzar el programa "Pulmón Verde 2090". Dile al Ministerio de Medio Ambiente que redacte un decreto para financiar una ONG que plante un par de árboles en las calles principales y en las zonas residenciales del sur. Eso calma a la opinión pública, da una imagen limpia de la gestión y demuestra que estamos tomando medidas activas para refrescar las ciudades. Con la cantidad de vegetación que vamos a poner, esos dos grados de los que habla Vance se neutralizan solos en un par de temporadas. 
+
+Por último, habla con el administrador del servidor Presidencial para que configure un filtro en mi correo. Que cualquier cosaa que venga del dominio del Observatorio o firmado por Vance se redirija automáticamente a la carpeta de correo no deseado o a un archivo secundario. No tengo tiempo para leer cincuenta páginas de pánico técnico todos los lunes.
+
+Nos vemos en la reunión de gabinete.
+
+— V. Hayes\n\n`, 
+    speed: 22, 
+    pause: 1000, 
+    class: "correo-verde" 
+  },
+
+  // ANÁLISIS FINAL DE HELION (Vuelve al color Naranja/Ámbar por defecto)
+  { text: "--------------------------------------------------\n", speed: 10, pause: 200 },
+  { text: "[ANÁLISIS DE SISTEMA HELION — REGISTRO HISTÓRICO]\n", speed: 20, pause: 300 },
+  { text: "[Fecha de análisis: 2221]\n", speed: 20, pause: 300 },
+  { text: "[Seguimiento de variables en base de datos:]\n", speed: 20, pause: 400 },
+  { text: "  - Estado de la ONG \"Pulmón Verde 2090\": Disuelta en 2094 por corte de presupuesto.\n", speed: 25, pause: 400 },
+  { text: "  - Tasa de supervivencia de la vegetación replantada: 0.02%.\n", speed: 25, pause: 400 },
+  { text: "  - Registros del Dr. Vance descartados por el filtro automatizado: 4,812 correos (sin leer).\n", speed: 25, pause: 0 }
+];
+
+let stepIndex = 0;
+let charIndex = 0;
+
+function procesarSecuencia() {
+  if (stepIndex >= logs.length) return;
+
+  const currentStep = logs[stepIndex];
+  const targetText = currentStep.text;
+
+  // Si el paso requiere una clase de color especial (como verde), creamos un elemento <span>
+  if (charIndex === 0 && currentStep.class) {
+    const span = document.createElement('span');
+    span.className = currentStep.class;
+    span.id = `step-${stepIndex}`;
+    terminal.appendChild(span);
+  }
+
+  const container = currentStep.class 
+    ? document.getElementById(`step-${stepIndex}`) 
+    : terminal;
+
+  if (charIndex < targetText.length) {
+    container.textContent += targetText.charAt(charIndex);
+    charIndex++;
+    setTimeout(procesarSecuencia, currentStep.speed);
+  } else {
+    stepIndex++;
+    charIndex = 0;
+    setTimeout(procesarSecuencia, currentStep.pause);
+  }
+}
+
+// Iniciar tecleo en pantalla
+procesarSecuencia();
+</script>
+</body>
+</html>
